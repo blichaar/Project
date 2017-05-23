@@ -51,7 +51,7 @@ public class MainWindowController {
         else
             tableShoppingCart.setOpacity(1);
     }
-
+    
     @FXML
     private void loadDatabase() {
         try {
