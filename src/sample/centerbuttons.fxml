@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="429.0" prefWidth="201.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.SecondController">
+   <children>
+      <VBox prefHeight="429.0" prefWidth="201.0">
+         <children>
+            <Region prefHeight="80.0" prefWidth="201.0" />
+            <Button fx:id="btnAddToCart" mnemonicParsing="false" text="Dodaj do koszyka">
+               <VBox.margin>
+                  <Insets left="45.0" />
+               </VBox.margin>
+            </Button>
+            <Region prefHeight="60.0" prefWidth="201.0" />
+            <Button fx:id="btnDeleteFromCart" mnemonicParsing="false" text="Usuń z koszyka">
+               <VBox.margin>
+                  <Insets left="50.0" />
+               </VBox.margin>
+            </Button>
+            <Region prefHeight="60.0" prefWidth="201.0" />
+            <Button fx:id="btnClearCart" mnemonicParsing="false" text="Wyczyść koszyk">
+               <VBox.margin>
+                  <Insets left="50.0" />
+               </VBox.margin>
+            </Button>
+            <Region prefHeight="60.0" prefWidth="201.0" />
+            <Button fx:id="btnExport" mnemonicParsing="false" text="Eksport do PDF">
+               <VBox.margin>
+                  <Insets left="50.0" />
+               </VBox.margin>
+            </Button>
+            <Region prefHeight="80.0" prefWidth="201.0" />
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

@@ -15,6 +15,7 @@ public class Product {
         this.price = new SimpleStringProperty(price);
     }
 
+
     public String getProductName() {
         return productName.get();
     }
