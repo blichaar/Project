@@ -3,21 +3,22 @@ package sample;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Stage;
 
 import java.sql.*;
+import java.util.Optional;
 
 
 public class MainWindowController {
+    private ObservableList<Product> data;
+    private SQLiteData dc = new SQLiteData();
+    private Connection con = dc.connect();
+    private SecondController secondController;
     @FXML
-    TableView tableShoppingCart;
+    Button btnShowCart;
     @FXML
-    TableView table;
+    public TableView table;
     @FXML
     TableColumn columnName;
     @FXML
@@ -30,9 +31,51 @@ public class MainWindowController {
     TextField fieldPieces;
     @FXML
     TextField fieldPrice;
-    private ObservableList<Product> data;
-    private SQLiteData dc = new SQLiteData();
-    private Connection con = dc.connect();
+
+
+    @FXML
+    void initialize() {
+        loadDatabase();
+    }
+
+    @FXML
+    private void btnUpdateClick() {
+
+        try {
+            Statement stat = con.createStatement();
+            if (checkIfExists()) {
+
+            } else {
+                String sql2 = "SELECT * FROM Products where Product='" + fieldName.getText() + "'";
+                ResultSet rs = stat.executeQuery(sql2);
+                if (rs.next()) {
+                    String query = "UPDATE Products set Product='" + fieldName.getText() + "',Pieces='" + fieldPieces.getText() + "',Price='"
+                            + fieldPrice.getText() + "' where Product='" + fieldName.getText() + "'";
+                    PreparedStatement pS = con.prepareStatement(query);
+                    pS.execute();
+                    loadDatabase();
+                    pS.close();
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Zaktualizowano pomyślnie!");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Produkt zaktualizowany pomyślnie!");
+                    alert.showAndWait();
+
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Nie znaleziono produktu!");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Przedmiot nie został znaleziony w bazie!");
+                    alert.showAndWait();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        fieldName.clear();
+        fieldPieces.clear();
+        fieldPrice.clear();
+    }
 
     @FXML
     private void btnAuthorsClick() {
@@ -44,14 +87,7 @@ public class MainWindowController {
                 "\n- Paweł Wojtusik");
         alert.showAndWait();
     }
-    @FXML
-    private void showCartClick(){
-        if(tableShoppingCart.getOpacity()==1)
-            tableShoppingCart.setOpacity(0);
-        else
-            tableShoppingCart.setOpacity(1);
-    }
-    
+
     @FXML
     private void loadDatabase() {
         try {
@@ -66,7 +102,8 @@ public class MainWindowController {
         } catch (SQLException ex) {
             System.err.println("Error" + ex);
         }
-//Set cell value factory to tableview.
+
+        //Set cell value factory to tableview.
         columnName.setCellValueFactory(new PropertyValueFactory<>("productName"));
         columnpLeft.setCellValueFactory(new PropertyValueFactory<>("pLeft"));
         columnPrice.setCellValueFactory(new PropertyValueFactory<>("Price"));
@@ -84,9 +121,10 @@ public class MainWindowController {
             PreparedStatement pS = con.prepareStatement(sql);
 
             if (fieldPrice.getText().isEmpty() || fieldPieces.getText().isEmpty() || fieldName.getText().isEmpty() ||
-                    fieldPieces.getText().matches("[a-zA-z]+/s") || fieldPrice.getText().matches("[a-zA-Z]")) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Autorzy");
+                    !fieldPieces.getText().matches("\\d+") || fieldPrice.getText().matches("[a-zA-Z]")) {
+
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Błędne dane");
                 alert.setHeaderText(null);
                 alert.setContentText("Pola tekstowe puste lub wpisane dane są nieprawidłowe!");
                 alert.showAndWait();
@@ -107,6 +145,12 @@ public class MainWindowController {
                     pS.setString(3, fieldPrice.getText());
                     pS.executeUpdate();
                     loadDatabase();
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Produkt dodany!");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Produkt pomyślnie dodany do bazy!");
+
+                    alert.showAndWait();
                 }
             }
             fieldName.clear();
@@ -115,6 +159,49 @@ public class MainWindowController {
             pS.close();
         } catch (SQLException ex) {
             System.out.println("error" + ex);
+        }
+    }
+
+    @FXML
+    private void btnDeleteFromBaseClick() {
+        TextInputDialog dialog = new TextInputDialog("");
+        dialog.setTitle("Podaj nazwę produktu");
+        dialog.setHeaderText(null);
+        dialog.setContentText("Podaj nazwe produktu: ");
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            String query = "DELETE from Products where Product= ?";
+            try {
+                PreparedStatement pS = con.prepareStatement(query);
+                pS.setString(1, result.get());
+                pS.executeUpdate();
+                pS.close();
+                loadDatabase();
+
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Usunięto poprawnie!");
+                alert.setHeaderText(null);
+                alert.setContentText("Produkt pomyślnie usunięty!");
+                alert.showAndWait();
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private boolean checkIfExists() {
+        if (fieldPrice.getText().isEmpty() || fieldPieces.getText().isEmpty() || fieldName.getText().isEmpty() ||
+                !fieldPieces.getText().matches("\\d+") || fieldPrice.getText().matches("[a-zA-Z]")) {
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Błędne dane");
+            alert.setHeaderText(null);
+            alert.setContentText("Pola tekstowe puste lub wpisane dane są nieprawidłowe!");
+            alert.showAndWait();
+            return true;
+        } else {
+            return false;
         }
     }
 }
